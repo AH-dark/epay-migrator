@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/epay-database-mingrator.iml" filepath="$PROJECT_DIR$/.idea/epay-database-mingrator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/epay-database-migrator.iml" filepath="$PROJECT_DIR$/.idea/epay-database-migrator.iml" />
     </modules>
   </component>
 </project>
