@@ -1,21 +1,21 @@
-package entry
+package actions
 
 import (
 	"context"
 	"fmt"
-	"github.com/samber/lo"
-	"github.com/star-horizon/epay-database-mingrator/internal/conf"
-	"github.com/star-horizon/epay-database-mingrator/internal/utils"
 	"strconv"
 	"time"
 
+	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
+	"github.com/star-horizon/epay-database-mingrator/internal/conf"
+	"github.com/star-horizon/epay-database-mingrator/internal/utils"
 	"github.com/star-horizon/epay-database-mingrator/model"
 )
 
-var defaultConfig = map[string]string{
+var defaultDatabaseConfig = map[string]string{
 	"version":              "2024",
 	"admin_user":           "admin",
 	"admin_pwd":            "123456",
@@ -73,7 +73,43 @@ var defaultConfig = map[string]string{
 	"notifyordername":      "1",
 }
 
-func runMigrate(ctx context.Context, db *gorm.DB) error {
+func createDatabaseConfig(ctx context.Context, configs map[string]string, db *gorm.DB) error {
+	db = db.WithContext(ctx)
+
+	for k, v := range configs {
+		logger := logrus.WithContext(ctx).WithField("key", k).WithField("val", v)
+		logger.Debug("create default config")
+
+		// check if config exists
+		if err := db.Model(&model.Config{}).
+			Where("k = ?", k).
+			First(&model.Config{}).
+			Error; err == nil {
+			logger.Debug("config already exists")
+			continue
+		} else if err != gorm.ErrRecordNotFound {
+			logger.WithError(err).Error("check default config failed")
+			return err
+		}
+
+		// create config
+		if err := db.
+			Model(&model.Config{}).
+			Create(&model.Config{
+				Key: k,
+				Val: v,
+			}).Error; err != nil {
+			logger.WithError(err).Error("create default config failed")
+			return err
+		}
+	}
+
+	return nil
+}
+
+func RunMigrate(ctx context.Context, db *gorm.DB) error {
+	db = db.WithContext(ctx)
+
 	logrus.WithContext(ctx).Info("auto migrate database tables")
 	if err := db.AutoMigrate(
 		&model.AlipayRisk{},
@@ -100,27 +136,9 @@ func runMigrate(ctx context.Context, db *gorm.DB) error {
 	}
 
 	logrus.WithContext(ctx).Info("create default config")
-	for k, v := range defaultConfig {
-		logger := logrus.WithContext(ctx).WithField("key", k).WithField("val", v)
-		logger.Debug("create default config")
-
-		if err := db.Model(&model.Config{}).
-			Where("k = ?", k).
-			First(&model.Config{}).
-			Error; err == gorm.ErrRecordNotFound {
-			if err := db.
-				Model(&model.Config{}).
-				Create(&model.Config{
-					Key: k,
-					Val: v,
-				}).Error; err != nil {
-				logger.WithError(err).Error("create default config failed")
-				return err
-			}
-		} else if err != nil {
-			logger.WithError(err).Error("check default config failed")
-			return err
-		}
+	if err := createDatabaseConfig(ctx, defaultDatabaseConfig, db); err != nil {
+		logrus.WithContext(ctx).WithError(err).Panic("create default config failed")
+		return err
 	}
 
 	logrus.WithContext(ctx).Info("init app config")
@@ -129,41 +147,19 @@ func runMigrate(ctx context.Context, db *gorm.DB) error {
 		"build":   time.Now().Format("2006-01-02"),
 		"cronkey": lo.If(lo.IsNotEmpty(conf.AppConfig.CronKey), conf.AppConfig.CronKey).Else(strconv.Itoa(utils.RandInt(100000, 999999))),
 	}
-
-	for k, v := range initData {
-		logger := logrus.WithContext(ctx).WithField("key", k).WithField("val", v)
-		logger.Debug("init app config")
-
-		if err := db.Model(&model.Config{}).
-			Where("k = ?", k).
-			First(&model.Config{}).
-			Error; err == gorm.ErrRecordNotFound {
-			if err := db.
-				Model(&model.Config{}).
-				Create(&model.Config{
-					Key: k,
-					Val: v,
-				}).Error; err != nil {
-				logger.WithError(err).Error("init app config failed")
-				return err
-			}
-		} else if err != nil {
-			logger.WithError(err).Error("check app config failed")
-			return err
-		}
+	if err := createDatabaseConfig(ctx, initData, db); err != nil {
+		logrus.WithContext(ctx).WithError(err).Panic("create app init config failed")
+		return err
 	}
 
 	fmt.Printf(`
-EPay Database Migrator
-Version: %s
-
 System Key: %s
 Build Time: %s
 Cron Key: %s
 
 Admin Username: admin
 Admin Password: 123456
-`, conf.Version, initData["syskey"], initData["build"], initData["cronkey"])
+`, initData["syskey"], initData["build"], initData["cronkey"])
 
 	return nil
 }
