@@ -1,4 +1,4 @@
-## EPay Database Migrator
+## EPay Migrator
 
 This is a simple migrator for EPay. It is based on the [gorm](https://gorm.io) library.
 

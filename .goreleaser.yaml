@@ -1,0 +1,81 @@
+project_name: epay-migrator
+
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - id: migrator
+    main: ./cmd/migrator
+    binary: migrator
+    env:
+      - CGO_ENABLED=0
+      - >-
+        {{- if eq .Os "darwin" }}
+          {{- if eq .Arch "amd64"}}CC=o64-clang{{- end }}
+          {{- if eq .Arch "arm64"}}CC=aarch64-apple-darwin20.2-clang{{- end }}
+        {{- end }}
+        {{- if eq .Os "windows" }}
+          {{- if eq .Arch "amd64" }}CC=x86_64-w64-mingw32-gcc{{- end }}
+        {{- end }}
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - '5'
+      - '6'
+      - '7'
+    ignore:
+      - goos: windows
+        goarch: arm
+        goarm: 5
+      - goos: windows
+        goarch: arm
+        goarm: 6
+      - goos: windows
+        goarch: arm
+        goarm: 7
+
+signs:
+  - artifacts: checksum
+
+archives:
+  - format: tar.gz
+    # this name template makes the OS and Arch compatible with the results of uname.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        format: zip
+
+release:
+  github:
+    owner: star-horizon
+    name: epay-migrator
+  draft: true
+  replace_existing_draft: true
+  prerelease: auto
+  mode: append
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^Doc:'
+      - '^Test:'
