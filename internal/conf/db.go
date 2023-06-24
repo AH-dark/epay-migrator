@@ -20,19 +20,20 @@ type databaseConfig struct {
 
 var DatabaseConfig databaseConfig
 
-func InitDBConfig() {
+func InitDBConfig(ctx context.Context) error {
 	prefix := "DB"
-	ctx := context.Background()
 
 	if err := envconfig.Process(prefix, &DatabaseConfig); err != nil {
 		logrus.WithContext(ctx).WithError(err).Errorf("failed to load env %s", prefix)
-		panic(err)
+		return err
 	}
 
 	logrus.WithContext(ctx).WithField("env", prefix).Debugf("loaded env %s: %+v", prefix, DatabaseConfig)
 
 	if err := validate.StructCtx(ctx, DatabaseConfig); err != nil {
 		logrus.WithContext(ctx).WithError(err).Errorf("failed to validate env %s", prefix)
-		panic(err)
+		return err
 	}
+
+	return nil
 }

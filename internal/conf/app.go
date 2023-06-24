@@ -14,19 +14,20 @@ type appConfig struct {
 
 var AppConfig appConfig
 
-func InitAppConfig() {
+func InitAppConfig(ctx context.Context) error {
 	prefix := "APP"
-	ctx := context.Background()
 
 	if err := envconfig.Process(prefix, &AppConfig); err != nil {
 		logrus.WithContext(ctx).WithError(err).Errorf("failed to load env %s", prefix)
-		panic(err)
+		return err
 	}
 
 	logrus.WithContext(ctx).WithField("env", prefix).Debugf("loaded env %s: %+v", prefix, AppConfig)
 
 	if err := validate.StructCtx(ctx, AppConfig); err != nil {
 		logrus.WithContext(ctx).WithError(err).Errorf("failed to validate env %s", prefix)
-		panic(err)
+		return err
 	}
+
+	return nil
 }
