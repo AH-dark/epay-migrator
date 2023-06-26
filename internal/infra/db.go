@@ -54,7 +54,7 @@ func NewDatabase(ctx context.Context) (*gorm.DB, error) {
 	}
 
 	if conf.DatabaseConfig.Driver == "mysql" || conf.DatabaseConfig.Driver == "mariadb" {
-		db.Set("gorm:table_options", "CHARSET=utf8mb4 ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci")
+		db.Set("gorm:table_options", "DEFAULT CHARSET = utf8 ENGINE = InnoDB")
 	}
 
 	return db, nil

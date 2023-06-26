@@ -73,6 +73,19 @@ var defaultDatabaseConfig = map[string]string{
 	"notifyordername":      "1",
 }
 
+var defaultPaymentTypes = []model.Type{
+	{ID: 1, Name: "alipay", Device: 0, ShowName: "支付宝", Status: 1},
+	{ID: 2, Name: "wxpay", Device: 0, ShowName: "微信支付", Status: 1},
+	{ID: 3, Name: "qqpay", Device: 0, ShowName: "QQ钱包", Status: 1},
+	{ID: 4, Name: "bank", Device: 0, ShowName: "网银支付", Status: 0},
+}
+
+var defaultGroup = model.Group{
+	GID:  0,
+	Name: "默认分组",
+	Info: `{"1":{"type":"","channel":"-1","rate":""},"2":{"type":"","channel":"-1","rate":""},"3":{"type":"","channel":"-1","rate":""}}`,
+}
+
 func createDatabaseConfig(ctx context.Context, configs map[string]string, db *gorm.DB) error {
 	db = db.WithContext(ctx)
 
@@ -135,6 +148,15 @@ func RunMigrate(ctx context.Context, db *gorm.DB) error {
 		return err
 	}
 
+	// alter auto increment if user table is empty
+	if err := db.Model(&model.User{}).First(&model.User{}).Error; err == gorm.ErrRecordNotFound {
+		logrus.WithContext(ctx).Info("alter auto increment")
+		if err := db.Model(&model.User{}).Exec(fmt.Sprintf("alter table %s AUTO_INCREMENT = 1000", model.User{}.TableName())).Error; err != nil {
+			logrus.WithContext(ctx).WithError(err).Error("alter auto increment failed")
+			return err
+		}
+	}
+
 	logrus.WithContext(ctx).Info("create default config")
 	if err := createDatabaseConfig(ctx, defaultDatabaseConfig, db); err != nil {
 		logrus.WithContext(ctx).WithError(err).Panic("create default config failed")
@@ -149,6 +171,36 @@ func RunMigrate(ctx context.Context, db *gorm.DB) error {
 	}
 	if err := createDatabaseConfig(ctx, initData, db); err != nil {
 		logrus.WithContext(ctx).WithError(err).Panic("create app init config failed")
+		return err
+	}
+
+	logrus.WithContext(ctx).Info("create default payment types")
+	for _, t := range defaultPaymentTypes {
+		if err := db.Model(&model.Type{}).
+			Where("name = ?", t.Name).
+			First(&model.Type{}).Error; err == nil {
+			continue
+		} else if err != gorm.ErrRecordNotFound {
+			logrus.WithContext(ctx).WithError(err).Error("check default payment type failed")
+			return err
+		}
+
+		if err := db.Model(&model.Type{}).Create(&t).Error; err != nil {
+			logrus.WithContext(ctx).WithError(err).Error("create default payment type failed")
+			return err
+		}
+	}
+
+	logrus.WithContext(ctx).Info("create default group")
+	if err := db.Model(&model.Group{}).
+		Where("gid = ?", defaultGroup.GID).
+		First(&model.Group{}).Error; err == nil {
+		return nil
+	} else if err != gorm.ErrRecordNotFound {
+		logrus.WithContext(ctx).WithError(err).Error("check default group failed")
+		return err
+	} else if err := db.Model(&model.Group{}).Create(&defaultGroup).Error; err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("create default group failed")
 		return err
 	}
 
