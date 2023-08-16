@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 
-	"github.com/star-horizon/epay-database-mingrator/actions"
+	"github.com/AH-dark/epay-migrator/actions"
 )
 
 type BootstrapParams struct {

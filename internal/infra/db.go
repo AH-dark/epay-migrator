@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 
-	"github.com/star-horizon/epay-database-mingrator/internal/conf"
+	"github.com/AH-dark/epay-migrator/internal/conf"
 )
 
 func NewDatabase(ctx context.Context) (*gorm.DB, error) {

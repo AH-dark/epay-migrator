@@ -5,7 +5,7 @@ import (
 	"flag"
 	"os"
 
-	"github.com/star-horizon/epay-database-mingrator/entry"
+	"github.com/AH-dark/epay-migrator/entry"
 )
 
 var ctx = context.Background()

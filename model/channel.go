@@ -1,8 +1,8 @@
 package model
 
 import (
+	"github.com/AH-dark/epay-migrator/internal/conf"
 	"github.com/shopspring/decimal"
-	"github.com/star-horizon/epay-database-mingrator/internal/conf"
 )
 
 type Channel struct {

@@ -1,4 +1,4 @@
-module github.com/star-horizon/epay-database-mingrator
+module github.com/AH-dark/epay-migrator
 
 go 1.20
 

@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/star-horizon/epay-database-mingrator/internal/conf"
+	"github.com/AH-dark/epay-migrator/internal/conf"
 	"time"
 )
 

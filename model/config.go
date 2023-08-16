@@ -1,6 +1,6 @@
 package model
 
-import "github.com/star-horizon/epay-database-mingrator/internal/conf"
+import "github.com/AH-dark/epay-migrator/internal/conf"
 
 type Config struct {
 	Key string `gorm:"primaryKey;column:k" json:"k"`

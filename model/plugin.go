@@ -1,6 +1,6 @@
 package model
 
-import "github.com/star-horizon/epay-database-mingrator/internal/conf"
+import "github.com/AH-dark/epay-migrator/internal/conf"
 
 type Plugin struct {
 	Name     string `gorm:"primaryKey;column:name" json:"name"`

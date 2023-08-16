@@ -10,9 +10,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"github.com/star-horizon/epay-database-mingrator/internal/conf"
-	"github.com/star-horizon/epay-database-mingrator/internal/utils"
-	"github.com/star-horizon/epay-database-mingrator/model"
+	"github.com/AH-dark/epay-migrator/internal/conf"
+	"github.com/AH-dark/epay-migrator/internal/utils"
+	"github.com/AH-dark/epay-migrator/model"
 )
 
 var defaultDatabaseConfig = map[string]string{
@@ -151,7 +151,7 @@ func RunMigrate(ctx context.Context, db *gorm.DB) error {
 	// alter auto increment if user table is empty
 	if err := db.Model(&model.User{}).First(&model.User{}).Error; err == gorm.ErrRecordNotFound {
 		logrus.WithContext(ctx).Info("alter auto increment")
-		if err := db.Model(&model.User{}).Exec(fmt.Sprintf("alter table %s AUTO_INCREMENT = 1000", model.User{}.TableName())).Error; err != nil {
+		if err := db.Model(&model.User{}).Exec(fmt.Sprintf("alter table `%s` AUTO_INCREMENT = 1000", model.User{}.TableName())).Error; err != nil {
 			logrus.WithContext(ctx).WithError(err).Error("alter auto increment failed")
 			return err
 		}

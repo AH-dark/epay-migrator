@@ -1,6 +1,6 @@
 package model
 
-import "github.com/star-horizon/epay-database-mingrator/internal/conf"
+import "github.com/AH-dark/epay-migrator/internal/conf"
 
 type Weixin struct {
 	ID        uint   `gorm:"primaryKey;autoIncrement;not null;column:id" json:"id"`
