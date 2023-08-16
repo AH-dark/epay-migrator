@@ -61,7 +61,7 @@ archives:
 
 release:
   github:
-    owner: star-horizon
+    owner: AH-dark
     name: epay-migrator
   draft: true
   replace_existing_draft: true
