@@ -8,9 +8,9 @@ import (
 
 type Order struct {
 	TradeNo     string          `gorm:"primaryKey;column:trade_no;type:char(19);not null" json:"trade_no"`
-	OutTradeNo  string          `gorm:"column:out_trade_no;not null;index" json:"out_trade_no"`
+	OutTradeNo  string          `gorm:"column:out_trade_no;not null;index:out_trade_no_uid,unique" json:"out_trade_no"`
 	ApiTradeNo  string          `gorm:"column:api_trade_no;index" json:"api_trade_no"`
-	UID         uint            `gorm:"column:uid;not null;index" json:"uid"`
+	UID         uint            `gorm:"column:uid;not null;index:out_trade_no_uid,unique" json:"uid"`
 	TID         uint            `gorm:"column:tid;not null;default:0" json:"tid"`
 	Type        uint            `gorm:"column:type;not null;" json:"type"`
 	Channel     uint            `gorm:"column:channel;not null" json:"channel"`
