@@ -2,6 +2,7 @@ package actions
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -149,7 +150,7 @@ func RunMigrate(ctx context.Context, db *gorm.DB) error {
 	}
 
 	// alter auto increment if user table is empty
-	if err := db.Model(&model.User{}).First(&model.User{}).Error; err == gorm.ErrRecordNotFound {
+	if err := db.Model(&model.User{}).First(&model.User{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		logrus.WithContext(ctx).Info("alter auto increment")
 		if err := db.Model(&model.User{}).Exec(fmt.Sprintf("alter table `%s` AUTO_INCREMENT = 1000", model.User{}.TableName())).Error; err != nil {
 			logrus.WithContext(ctx).WithError(err).Error("alter auto increment failed")
@@ -180,7 +181,7 @@ func RunMigrate(ctx context.Context, db *gorm.DB) error {
 			Where("name = ?", t.Name).
 			First(&model.Type{}).Error; err == nil {
 			continue
-		} else if err != gorm.ErrRecordNotFound {
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 			logrus.WithContext(ctx).WithError(err).Error("check default payment type failed")
 			return err
 		}
@@ -196,7 +197,7 @@ func RunMigrate(ctx context.Context, db *gorm.DB) error {
 		Where("gid = ?", defaultGroup.GID).
 		First(&model.Group{}).Error; err == nil {
 		return nil
-	} else if err != gorm.ErrRecordNotFound {
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		logrus.WithContext(ctx).WithError(err).Error("check default group failed")
 		return err
 	} else if err := db.Model(&model.Group{}).Create(&defaultGroup).Error; err != nil {
