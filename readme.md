@@ -2,36 +2,21 @@
 
 This is a simple migrator for EPay. It is based on the [gorm](https://gorm.io) library.
 
-## Usage
-
-First, you need to build the binary:
-
-```bash
-go build -o migrator cmd/migrator/main.go
 ```
+NAME:
+   epay-migrator - migration tool for epay
 
-### Migrate
+USAGE:
+   epay-migrator [global options] command [command options] [arguments...]
 
-You need to set the following environment variables:
+VERSION:
+   2.0.0
 
-```bash
-export DB_HOST=localhost
-export DB_PORT=3306
-export DB_USER=epay
-export DB_PASSWORD=[password]
-export DB_NAME=epay
-```
+COMMANDS:
+   migrate  generate sql schema
+   help, h  Shows a list of commands or help for one command
 
-you can also set by using the `.env` file
-
-Then you can run the migrator:
-
-```bash
-./migrator --action migrate
-```
-
-If you want to debug the migrator, you can set the `--debug` flag:
-
-```bash
-./migrator --action migrate --debug
+GLOBAL OPTIONS:
+   --help, -h     show help
+   --version, -v  print the version
 ```
