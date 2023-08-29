@@ -6,7 +6,7 @@ before:
 
 builds:
   - id: migrator
-    main: ./cmd/migrator
+    main: .
     binary: migrator
     env:
       - CGO_ENABLED=0
