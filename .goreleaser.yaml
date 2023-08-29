@@ -72,7 +72,8 @@ release:
 dockers:
   - id: migrator
     image_templates:
-      - {{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}
+      - >-
+        {{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}
     dockerfile: Dockerfile
 
 checksum:
