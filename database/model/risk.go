@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
 	"time"
 )
 
@@ -13,8 +12,4 @@ type Risk struct {
 	Content string    `gorm:"column:content" json:"content"`
 	Date    time.Time `gorm:"column:date;type:datetime" json:"date"`
 	Status  int       `gorm:"column:status;not null;default:0" json:"status"`
-}
-
-func (Risk) TableName() string {
-	return conf.DatabaseConfig.Prefix + "risk"
 }

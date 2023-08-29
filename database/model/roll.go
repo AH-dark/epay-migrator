@@ -1,7 +1,5 @@
 package model
 
-import "github.com/AH-dark/epay-migrator/internal/conf"
-
 type Roll struct {
 	ID     uint   `gorm:"primaryKey;autoIncrement;not null;column:id" json:"id"`
 	Type   uint   `gorm:"column:type;not null;default:0" json:"type"`
@@ -10,8 +8,4 @@ type Roll struct {
 	Info   string `gorm:"column:info" json:"info"`
 	Status int    `gorm:"column:status;not null;default:0" json:"status"`
 	Index  int    `gorm:"column:index;not null;default:0" json:"index"`
-}
-
-func (Roll) TableName() string {
-	return conf.DatabaseConfig.Prefix + "roll"
 }

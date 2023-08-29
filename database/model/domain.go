@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
 	"time"
 )
 
@@ -12,8 +11,4 @@ type Domain struct {
 	Status  int       `gorm:"column:status;not null;default:0" json:"status"`
 	AddTime time.Time `gorm:"column:addtime;type:datetime" json:"addtime"`
 	EndTime time.Time `gorm:"column:endtime;type:datetime" json:"endtime"`
-}
-
-func (Domain) TableName() string {
-	return conf.DatabaseConfig.Prefix + "domain"
 }

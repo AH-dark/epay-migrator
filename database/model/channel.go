@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
 	"github.com/shopspring/decimal"
 )
 
@@ -26,8 +25,4 @@ type Channel struct {
 	AppWxMp       int             `gorm:"column:appwxmp" json:"appwxmp"`
 	AppWxA        int             `gorm:"column:appwxa" json:"appwxa"`
 	AppSwitch     int             `gorm:"column:appswitch" json:"appswitch"`
-}
-
-func (Channel) TableName() string {
-	return conf.DatabaseConfig.Prefix + "channel"
 }

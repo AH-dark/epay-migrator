@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
 	"time"
 )
 
@@ -12,8 +11,4 @@ type Anounce struct {
 	Sort    int       `gorm:"column:sort;not null;default:1" json:"sort"`
 	AddTime time.Time `gorm:"column:addtime;type:datetime" json:"add_time"`
 	Status  int       `gorm:"column:status;not null;default:1" json:"status"`
-}
-
-func (Anounce) TableName() string {
-	return conf.DatabaseConfig.Prefix + "anounce"
 }

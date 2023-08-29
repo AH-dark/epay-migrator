@@ -1,9 +1,9 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
-	"github.com/shopspring/decimal"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type User struct {
@@ -45,8 +45,4 @@ type User struct {
 	Refund       int             `gorm:"column:refund;not null;default:0" json:"refund"`
 	ChannelInfo  string          `gorm:"column:channelinfo" json:"channelinfo"`
 	OrderName    string          `gorm:"column:ordername" json:"ordername"`
-}
-
-func (User) TableName() string {
-	return conf.DatabaseConfig.Prefix + "user"
 }

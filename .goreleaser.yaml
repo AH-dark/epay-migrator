@@ -3,6 +3,7 @@ project_name: epay-migrator
 before:
   hooks:
     - go mod tidy
+
 builds:
   - id: migrator
     main: ./cmd/migrator
@@ -67,6 +68,15 @@ release:
   replace_existing_draft: true
   prerelease: auto
   mode: append
+
+dockers:
+  - id: migrator
+    image_templates:
+      - >-
+        {{ .Env.DOCKER_REGISTRY }}
+        /{{ .Env.DOCKER_IMAGE_NAME }}
+        :{{ .Tag }}
+    dockerfile: Dockerfile
 
 checksum:
   name_template: 'checksums.txt'

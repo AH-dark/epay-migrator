@@ -1,9 +1,9 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
-	"github.com/shopspring/decimal"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type Batch struct {
@@ -12,8 +12,4 @@ type Batch struct {
 	Count    int             `gorm:"column:count;not null;default:0"`
 	Time     time.Time       `gorm:"column:time;type:datetime"`
 	Status   int             `gorm:"column:status;not null;default:0"`
-}
-
-func (Batch) TableName() string {
-	return conf.DatabaseConfig.Prefix + "batch"
 }

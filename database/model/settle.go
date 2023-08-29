@@ -1,9 +1,9 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
-	"github.com/shopspring/decimal"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type Settle struct {
@@ -23,8 +23,4 @@ type Settle struct {
 	TransferResult string          `gorm:"column:transfer_result" json:"transfer_result"`
 	TransferDate   time.Time       `gorm:"column:transfer_date;type:datetime" json:"transfer_date"`
 	Result         string          `gorm:"column:result" json:"result"`
-}
-
-func (Settle) TableName() string {
-	return conf.DatabaseConfig.Prefix + "settle"
 }

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
 	"time"
 )
 
@@ -19,8 +18,4 @@ type AlipayRisk struct {
 	Date         time.Time `gorm:"column:date;type:datetime" json:"date"`
 	Status       int       `gorm:"column:status;not null;default:0" json:"status"`
 	ProcessCode  string    `gorm:"column:process_code" json:"process_code"`
-}
-
-func (AlipayRisk) TableName() string {
-	return conf.DatabaseConfig.Prefix + "alipayrisk"
 }

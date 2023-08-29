@@ -1,8 +1,6 @@
 package model
 
-import "github.com/AH-dark/epay-migrator/internal/conf"
-
-type RegCode struct {
+type Regcode struct {
 	ID       int    `gorm:"primaryKey;autoIncrement;not null;column:id" json:"id"`
 	UID      int    `gorm:"column:uid;not null;default:0" json:"uid"`
 	Type     int    `gorm:"column:type;not null;default:0;index" json:"type"`
@@ -12,8 +10,4 @@ type RegCode struct {
 	IP       string `gorm:"column:ip" json:"ip"`
 	Status   int    `gorm:"column:status;not null;default:0" json:"status"`
 	ErrCount int    `gorm:"column:errcount;not null;default:0" json:"errcount"`
-}
-
-func (RegCode) TableName() string {
-	return conf.DatabaseConfig.Prefix + "regcode"
 }

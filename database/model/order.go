@@ -1,9 +1,9 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
-	"github.com/shopspring/decimal"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type Order struct {
@@ -33,8 +33,4 @@ type Order struct {
 	NotifyTime  time.Time       `gorm:"column:notifytime;type:datetime" json:"notifytime"`
 	Invite      uint            `gorm:"column:invite;not null;default:0;index" json:"invite"`
 	InviteMoney decimal.Decimal `gorm:"column:invite_money;type:decimal(10,2)" json:"invite_money"`
-}
-
-func (Order) TableName() string {
-	return conf.DatabaseConfig.Prefix + "order"
 }

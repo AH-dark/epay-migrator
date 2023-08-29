@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
 	"time"
 )
 
@@ -13,8 +12,4 @@ type Log struct {
 	IP   string    `gorm:"column:ip" json:"ip"`
 	City string    `gorm:"column:city" json:"city"`
 	Data string    `gorm:"column:data" json:"data"`
-}
-
-func (Log) TableName() string {
-	return conf.DatabaseConfig.Prefix + "log"
 }

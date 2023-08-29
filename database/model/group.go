@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
 	"github.com/shopspring/decimal"
 )
 
@@ -16,8 +15,4 @@ type Group struct {
 	SettleOpen int             `gorm:"column:settle_open;default:0;not null" json:"settle_open"`
 	SettleType int             `gorm:"column:settle_type;default:0;not null" json:"settle_type"`
 	Settings   string          `gorm:"column:settings;default:''" json:"settings"`
-}
-
-func (Group) TableName() string {
-	return conf.DatabaseConfig.Prefix + "group"
 }

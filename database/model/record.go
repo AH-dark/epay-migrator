@@ -1,9 +1,9 @@
 package model
 
 import (
-	"github.com/AH-dark/epay-migrator/internal/conf"
-	"github.com/shopspring/decimal"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type Record struct {
@@ -16,8 +16,4 @@ type Record struct {
 	Type     string          `gorm:"column:type" json:"type"`
 	TradeNo  string          `gorm:"column:trade_no;index" json:"trade_no"`
 	Date     time.Time       `gorm:"column:date;type:datetime;not null" json:"date"`
-}
-
-func (Record) TableName() string {
-	return conf.DatabaseConfig.Prefix + "record"
 }

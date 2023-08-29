@@ -1,19 +1,16 @@
 package actions
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
-	"github.com/samber/lo"
-	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 	"gorm.io/gorm"
 
-	"github.com/AH-dark/epay-migrator/internal/conf"
-	"github.com/AH-dark/epay-migrator/internal/utils"
-	"github.com/AH-dark/epay-migrator/model"
+	"github.com/AH-dark/epay-migrator/database/conn"
+	"github.com/AH-dark/epay-migrator/database/model"
+	"github.com/AH-dark/epay-migrator/internal/log"
 )
 
 var defaultDatabaseConfig = map[string]string{
@@ -87,11 +84,12 @@ var defaultGroup = model.Group{
 	Info: `{"1":{"type":"","channel":"-1","rate":""},"2":{"type":"","channel":"-1","rate":""},"3":{"type":"","channel":"-1","rate":""}}`,
 }
 
-func createDatabaseConfig(ctx context.Context, configs map[string]string, db *gorm.DB) error {
-	db = db.WithContext(ctx)
+func createDatabaseConfig(c *cli.Context, configs map[string]string) error {
+	db := conn.GetDB(c)
+	ctx := c.Context
 
 	for k, v := range configs {
-		logger := logrus.WithContext(ctx).WithField("key", k).WithField("val", v)
+		logger := log.Log(ctx).WithField("key", k).WithField("val", v)
 		logger.Debug("create default config")
 
 		// check if config exists
@@ -101,7 +99,7 @@ func createDatabaseConfig(ctx context.Context, configs map[string]string, db *go
 			Error; err == nil {
 			logger.Debug("config already exists")
 			continue
-		} else if err != gorm.ErrRecordNotFound {
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 			logger.WithError(err).Error("check default config failed")
 			return err
 		}
@@ -121,10 +119,11 @@ func createDatabaseConfig(ctx context.Context, configs map[string]string, db *go
 	return nil
 }
 
-func RunMigrate(ctx context.Context, db *gorm.DB) error {
-	db = db.WithContext(ctx)
+func RunMigrate(c *cli.Context) error {
+	ctx := c.Context
+	db := conn.GetDB(c)
 
-	logrus.WithContext(ctx).Info("auto migrate database tables")
+	log.Log(ctx).Info("auto migrate database tables")
 	if err := db.AutoMigrate(
 		&model.AlipayRisk{},
 		&model.Anounce{},
@@ -137,7 +136,7 @@ func RunMigrate(ctx context.Context, db *gorm.DB) error {
 		&model.Order{},
 		&model.Plugin{},
 		&model.Record{},
-		&model.RegCode{},
+		&model.Regcode{},
 		&model.Risk{},
 		&model.Roll{},
 		&model.Settle{},
@@ -145,63 +144,67 @@ func RunMigrate(ctx context.Context, db *gorm.DB) error {
 		&model.User{},
 		&model.Weixin{},
 	); err != nil {
-		logrus.WithContext(ctx).WithError(err).Error("auto migrate database tables failed")
+		log.Log(ctx).WithError(err).Error("auto migrate database tables failed")
 		return err
 	}
 
 	// alter auto increment if user table is empty
 	if err := db.Model(&model.User{}).First(&model.User{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		logrus.WithContext(ctx).Info("alter auto increment")
-		if err := db.Model(&model.User{}).Exec(fmt.Sprintf("alter table `%s` AUTO_INCREMENT = 1000", model.User{}.TableName())).Error; err != nil {
-			logrus.WithContext(ctx).WithError(err).Error("alter auto increment failed")
+		log.Log(ctx).Info("alter auto increment")
+		if err := db.Model(&model.User{}).
+			Exec(fmt.Sprintf(
+				"alter table `%s` AUTO_INCREMENT = 1000",
+				db.NamingStrategy.TableName("user"),
+			)).Error; err != nil {
+			log.Log(ctx).WithError(err).Error("alter auto increment failed")
 			return err
 		}
 	}
 
-	logrus.WithContext(ctx).Info("create default config")
-	if err := createDatabaseConfig(ctx, defaultDatabaseConfig, db); err != nil {
-		logrus.WithContext(ctx).WithError(err).Panic("create default config failed")
+	log.Log(ctx).Info("create default config")
+	if err := createDatabaseConfig(c, defaultDatabaseConfig); err != nil {
+		log.Log(ctx).WithError(err).Panic("create default config failed")
 		return err
 	}
 
-	logrus.WithContext(ctx).Info("init app config")
+	log.Log(ctx).Info("init app config")
 	initData := map[string]string{
-		"syskey":  lo.If(lo.IsNotEmpty(conf.AppConfig.SysKey), conf.AppConfig.SysKey).Else(utils.RandString(32)),
+		"syskey":  c.String("app.syskey"),
 		"build":   time.Now().Format("2006-01-02"),
-		"cronkey": lo.If(lo.IsNotEmpty(conf.AppConfig.CronKey), conf.AppConfig.CronKey).Else(strconv.Itoa(utils.RandInt(100000, 999999))),
+		"cronkey": c.String("app.cronkey"),
 	}
-	if err := createDatabaseConfig(ctx, initData, db); err != nil {
-		logrus.WithContext(ctx).WithError(err).Panic("create app init config failed")
+	if err := createDatabaseConfig(c, initData); err != nil {
+		log.Log(ctx).WithError(err).Panic("create app init config failed")
 		return err
 	}
 
-	logrus.WithContext(ctx).Info("create default payment types")
+	log.Log(ctx).Info("create default payment types")
 	for _, t := range defaultPaymentTypes {
 		if err := db.Model(&model.Type{}).
 			Where("name = ?", t.Name).
 			First(&model.Type{}).Error; err == nil {
 			continue
 		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-			logrus.WithContext(ctx).WithError(err).Error("check default payment type failed")
+			log.Log(ctx).WithError(err).Error("check default payment type failed")
 			return err
 		}
 
 		if err := db.Model(&model.Type{}).Create(&t).Error; err != nil {
-			logrus.WithContext(ctx).WithError(err).Error("create default payment type failed")
+			log.Log(ctx).WithError(err).Error("create default payment type failed")
 			return err
 		}
 	}
 
-	logrus.WithContext(ctx).Info("create default group")
+	log.Log(ctx).Info("create default group")
 	if err := db.Model(&model.Group{}).
 		Where("gid = ?", defaultGroup.GID).
 		First(&model.Group{}).Error; err == nil {
 		return nil
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-		logrus.WithContext(ctx).WithError(err).Error("check default group failed")
+		log.Log(ctx).WithError(err).Error("check default group failed")
 		return err
 	} else if err := db.Model(&model.Group{}).Create(&defaultGroup).Error; err != nil {
-		logrus.WithContext(ctx).WithError(err).Error("create default group failed")
+		log.Log(ctx).WithError(err).Error("create default group failed")
 		return err
 	}
 
