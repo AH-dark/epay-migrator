@@ -10,7 +10,7 @@ COPY . .
 
 RUN go build -o epay-migrator .
 
-# Path: dockerfile
+# Path: Dockerfile
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
